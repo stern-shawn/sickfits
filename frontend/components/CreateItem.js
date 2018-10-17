@@ -32,6 +32,7 @@ class CreateItem extends Component {
     image: '',
     largeImage: '',
     price: 0,
+    imageUploading: false,
   };
 
   handleChange = ({ target: { name, type, value } }) => {
@@ -39,8 +40,30 @@ class CreateItem extends Component {
     this.setState({ [name]: val });
   };
 
+  uploadFile = async ({ target: { files }}) => {
+    // TODO: Add check/call to delete previously uploaded image if user changes their mind while
+    // using this form to prevent spam upload of multiple files to cloundinary
+    const data = new FormData();
+    data.append('file', files[0]);
+    data.append('upload_preset', 'sickfits');
+
+    this.setState({ imageUploading: true });
+
+    const res = await fetch('https://api.cloudinary.com/v1_1/dyjo5a3ci/image/upload', {
+      method: 'POST',
+      body: data,
+    });
+    const file = await res.json();
+
+    this.setState({
+      imageUploading: false,
+      image: file.secure_url,
+      largeImage: file.eager[0].secure_url,
+    })
+  };
+
   render() {
-    const { title, price, description } = this.state;
+    const { title, price, description, image, imageUploading } = this.state;
 
     return (
       <Mutation mutation={CREATE_ITEM_MUTATION} variables={this.state}>
@@ -58,7 +81,20 @@ class CreateItem extends Component {
             }}
           >
             <ErrorMessage error={error} />
-            <fieldset disabled={loading} aria-busy={loading}>
+            <fieldset disabled={loading || imageUploading} aria-busy={loading}>
+              <label htmlFor="file">
+                Image
+                <input
+                  type="file"
+                  id="file"
+                  name="file"
+                  placeholder="Upload an Image"
+                  required
+                  onChange={this.uploadFile}
+                />
+                {imageUploading && '(Uploading image, please wait...)'}
+                {image && <img src={image} alt="Upload Preview" width={200} />}
+              </label>
               <label htmlFor="title">
                 Title
                 <input
