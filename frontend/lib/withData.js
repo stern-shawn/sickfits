@@ -2,8 +2,8 @@ import withApollo from 'next-with-apollo';
 import ApolloClient from 'apollo-boost';
 import { endpoint } from '../config';
 
-function createClient({ headers }) {
-  return new ApolloClient({
+const createClient = ({ headers }) =>
+  new ApolloClient({
     uri: process.env.NODE_ENV === 'development' ? endpoint : endpoint,
     request: operation => {
       operation.setContext({
@@ -14,6 +14,5 @@ function createClient({ headers }) {
       });
     },
   });
-}
 
 export default withApollo(createClient);
