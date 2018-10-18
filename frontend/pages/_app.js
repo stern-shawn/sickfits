@@ -4,14 +4,13 @@ import withData from '../lib/withData';
 import Page from '../components/Page';
 
 class MyApp extends App {
-  // Necessary so that any child graphQL queries get fired and are in context before trying to SSR
-  // Not needed if doing a normal client-only app
+  // Necessary so that any child components have access to route query params
   static async getInitialProps({ Component, ctx }) {
     let pageProps = {};
     if (Component.getInitialProps) {
       pageProps = await Component.getInitialProps(ctx)
     }
-    // Exposes the query to the user
+    // Exposes the query params
     pageProps.query = ctx.query;
     return { pageProps };
   }
