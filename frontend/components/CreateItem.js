@@ -89,7 +89,6 @@ class CreateItem extends Component {
                   id="file"
                   name="file"
                   placeholder="Upload an Image"
-                  required
                   onChange={this.uploadFile}
                 />
                 {imageUploading && '(Uploading image, please wait...)'}
