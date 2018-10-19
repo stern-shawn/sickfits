@@ -14,12 +14,16 @@ export const DELETE_ITEM_MUTATION = gql`
 class DeleteItem extends Component {
   update = (cache, payload) => {
     // Manually update our cache instead of doing a full refetch on changes
-    // 1. Read our cache using the query that created it in the first place
-    const data = cache.readQuery({ query: ALL_ITEMS_QUERY });
-    // 2. Filter out the item we're deleting
-    const filteredItems = data.items.filter(item => item.id !== payload.data.deleteItem.id);
-    // 3. Write the updated items back into the cache
-    cache.writeQuery({ query: ALL_ITEMS_QUERY, data: { items: filteredItems } });
+    // Read our cache using the query that created it in the first place; destructure items
+    const { items } = cache.readQuery({ query: ALL_ITEMS_QUERY });
+    // Write the new items state back into the cache
+    cache.writeQuery({
+      query: ALL_ITEMS_QUERY,
+      data: {
+        // Filter out the item we're deleting
+        items: items.filter(item => item.id !== payload.data.deleteItem.id),
+      },
+    });
   };
 
   render() {
