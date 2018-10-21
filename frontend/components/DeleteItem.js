@@ -12,7 +12,7 @@ export const DELETE_ITEM_MUTATION = gql`
 `;
 
 class DeleteItem extends Component {
-  update = (cache, payload) => {
+  update = (cache, { data: { deleteItem }}) => {
     // Manually update our cache instead of doing a full refetch on changes
     // Read our cache using the query that created it in the first place; destructure items
     const { items } = cache.readQuery({ query: ALL_ITEMS_QUERY });
@@ -21,7 +21,7 @@ class DeleteItem extends Component {
       query: ALL_ITEMS_QUERY,
       data: {
         // Filter out the item we're deleting
-        items: items.filter(item => item.id !== payload.data.deleteItem.id),
+        items: items.filter(item => item.id !== deleteItem.id),
       },
     });
   };

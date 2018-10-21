@@ -3,6 +3,15 @@ type SuccessMessage {
   message: String
 }
 
+# Add our own definition of User on top of Prisma's so that the underlying
+# password/resetToken/expiry fields can't be queried by the front end by malicious users
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  permissions: [Permission!]!
+}
+
 type Mutation {
   createItem(title: String, description: String, price: Int, image: String, largeImage: String): Item!
   updateItem(id: ID!, title: String, description: String, price: Int): Item!
@@ -10,6 +19,8 @@ type Mutation {
   signup(email: String!, password: String!, name: String!): User
   signin(email: String!, password: String!): User!
   signout: SuccessMessage
+  requestReset(email: String!): SuccessMessage
+  resetPassword(resetToken: String!, password: String!, confirmPassword: String!): User!
 }
 
 type Query {

@@ -1,5 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { randomBytes } = require('crypto');
+const { promisify } = require('util');
 
 // Generates a JWT for the given user and attaches it as a cookie to the provided response object
 const assignToken = (user, response) => {
@@ -11,6 +13,9 @@ const assignToken = (user, response) => {
     maxAge: 1000 * 60 * 60 * 24 * 365, // 1 year cookie expiry lol
   });
 };
+
+// randomBytes is an async callback fn by default, use promisify util for syntax sugar
+const randomBytesPromise = promisify(randomBytes);
 
 const Mutations = {
   createItem: async (parent, args, ctx, info) => {
@@ -70,6 +75,51 @@ const Mutations = {
   signout: async (parent, args, { response }, info) => {
     response.clearCookie('token');
     return { message: 'Bye!' };
+  },
+  requestReset: async (parent, { email }, { db }, info) => {
+    // Check if user exists
+    const user = await db.query.user({ where: { email } });
+    if (!user) throw new Error(`No user found for email: ${email}!`);
+    // Generate and assign a reset token to the user.
+    const resetToken = (await randomBytesPromise(20)).toString('hex');
+    const resetTokenExpiry = Date.now() + 3600000; // 1hr from now
+    const res = await db.mutation.updateUser({
+      where: { email },
+      data: { resetToken, resetTokenExpiry },
+    });
+    // TODO: Email the token to the user
+
+    // Return a success payload once all steps are complete
+    return { message: 'Reset token assigned!' };
+  },
+  resetPassword: async (
+    parent,
+    { resetToken, password, confirmPassword },
+    { db, response },
+    info,
+  ) => {
+    // Check that the passwords match
+    if (password !== confirmPassword) throw new Error('Passwords do not match!');
+    // Check if legit reset token (matches a user and is not expired, _gte is a Prisma-generated query option)
+    const [user] = await db.query.users({
+      where: { resetToken, resetTokenExpiry_gte: Date.now() - 3600000 },
+    });
+    if (!user) throw new Error('This token is either invalid or expired');
+    // Hash the new password
+    const newPassword = await bcrypt.hash(password, 10);
+    // Save new pw to the user, nullify reset token fields
+    const updatedUser = await db.mutation.updateUser({
+      where: { email: user.email },
+      data: {
+        password: newPassword,
+        resetToken: null,
+        resetTokenExpiry: null,
+      },
+    });
+    // Generate a new jwt and set it to their new session
+    assignToken(user, response);
+    // Return the user
+    return updatedUser;
   },
 };
 

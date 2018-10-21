@@ -1,3 +1,4 @@
+import RequestReset from '../components/RequestReset';
 import Signin from '../components/Signin';
 import Signup from '../components/Signup';
 import styled from 'styled-components';
@@ -12,6 +13,7 @@ const SignupPage = () => (
   <Columns>
     <Signup />
     <Signin />
+    <RequestReset />
   </Columns>
 );
 
