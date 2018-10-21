@@ -5,9 +5,9 @@ import Form from './styles/Form';
 import ErrorMessage from './ErrorMessage';
 import { CURRENT_USER_QUERY } from './User';
 
-const SIGNUP_MUTATION = gql`
-  mutation SIGNUP_MUTATION($email: String!, $name: String!, $password: String!) {
-    signup(email: $email, name: $name, password: $password) {
+const SIGNIN_MUTATION = gql`
+  mutation SIGNIN_MUTATION($email: String!, $password: String!) {
+    signin(email: $email, password: $password) {
       id
       email
       name
@@ -16,12 +16,11 @@ const SIGNUP_MUTATION = gql`
 `;
 
 const initialState = {
-  name: '',
   email: '',
   password: '',
 };
 
-class Signup extends Component {
+class Signin extends Component {
   state = initialState;
 
   handleChange = ({ target: { name, value } }) => this.setState({ [name]: value });
@@ -29,21 +28,21 @@ class Signup extends Component {
   render() {
     return (
       <Mutation
-        mutation={SIGNUP_MUTATION}
+        mutation={SIGNIN_MUTATION}
         variables={this.state}
         refetchQueries={[{ query: CURRENT_USER_QUERY }]}
       >
-        {(signup, { loading, error }) => (
+        {(signin, { loading, error }) => (
           <Form
             method="post"
             onSubmit={async e => {
               e.preventDefault();
-              await signup();
+              await signin();
               this.setState(initialState);
             }}
           >
             <fieldset disabled={loading} aria-busy={loading}>
-              <h2>Sign up for an account</h2>
+              <h2>Sign into your account</h2>
               <ErrorMessage error={error} />
               <label htmlFor="email">
                 Email
@@ -53,17 +52,6 @@ class Signup extends Component {
                   placeholder="email"
                   required
                   value={this.state.email}
-                  onChange={this.handleChange}
-                />
-              </label>
-              <label htmlFor="name">
-                Name
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="name"
-                  required
-                  value={this.state.name}
                   onChange={this.handleChange}
                 />
               </label>
@@ -78,7 +66,7 @@ class Signup extends Component {
                   onChange={this.handleChange}
                 />
               </label>
-              <button type="submit">Sign Up!</button>
+              <button type="submit">Sign In!</button>
             </fieldset>
           </Form>
         )}
@@ -87,4 +75,4 @@ class Signup extends Component {
   }
 }
 
-export default Signup;
+export default Signin;
