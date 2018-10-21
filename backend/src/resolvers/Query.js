@@ -10,6 +10,11 @@ const Query = {
   items: forwardTo('db'),
   item: forwardTo('db'),
   itemsConnection: forwardTo('db'),
+  me: (parent, args, { db, request }, info) => {
+    // Return null if no userId attached, otherwise return the promise for a user by id query w/ info
+    if (!request.userId) return null;
+    return db.query.user({ where: { id: request.userId } }, info);
+  },
 };
 
 module.exports = Query;
