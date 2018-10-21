@@ -52,6 +52,9 @@
     "jest": "^23.6.0",
     "jest-transform-graphql": "^2.1.0"
   },
+  "resolutions": {
+    "apollo-boost/apollo-cache-inmemory": "1.2.10"
+  },
   "jest": {
     "setupTestFrameworkScriptFile": "<rootDir>/jest.setup.js",
     "testPathIgnorePatterns": [

@@ -12,18 +12,14 @@ export const DELETE_ITEM_MUTATION = gql`
 `;
 
 class DeleteItem extends Component {
-  update = (cache, { data: { deleteItem }}) => {
-    // Manually update our cache instead of doing a full refetch on changes
-    // Read our cache using the query that created it in the first place; destructure items
-    const { items } = cache.readQuery({ query: ALL_ITEMS_QUERY });
+  // Manually update our cache instead of doing a full refetch on changes
+  update = (cache, { data: { deleteItem } }) => {
+    // Read our cache using the query that created it in the first place
+    const data = cache.readQuery({ query: ALL_ITEMS_QUERY });
+    // Mutate the data directly because apollo promotes bad practices
+    data.items = data.items.filter(item => item.id !== deleteItem.id);
     // Write the new items state back into the cache
-    cache.writeQuery({
-      query: ALL_ITEMS_QUERY,
-      data: {
-        // Filter out the item we're deleting
-        items: items.filter(item => item.id !== deleteItem.id),
-      },
-    });
+    cache.writeQuery({ query: ALL_ITEMS_QUERY, data });
   };
 
   render() {
