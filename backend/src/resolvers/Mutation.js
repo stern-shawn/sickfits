@@ -171,6 +171,37 @@ const Mutations = {
       info,
     );
   },
+  addToCart: async (parent, args, { db, request: { userId } }, info) => {
+    // Check if logged in first
+    if (!userId) throw new Error('You must be logged in to do that!');
+    // Check their current cart
+    const [existingCartItem] = await db.query.cartItems({
+      where: {
+        user: { id: userId },
+        item: { id: args.id },
+      },
+    });
+    // If item already in cart, quantity++
+    if (existingCartItem) {
+      return db.mutation.updateCartItem(
+        {
+          where: { id: existingCartItem.id },
+          data: { quantity: existingCartItem.quantity + 1 },
+        },
+        info,
+      );
+    }
+    // If not add for first time!
+    return db.mutation.createCartItem(
+      {
+        data: {
+          user: { connect: { id: userId } },
+          item: { connect: { id: args.id } },
+        },
+      },
+      info,
+    );
+  },
 };
 
 module.exports = Mutations;
