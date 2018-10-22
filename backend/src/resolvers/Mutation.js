@@ -171,6 +171,49 @@ const Mutations = {
       info,
     );
   },
+  addToCart: async (parent, args, { db, request: { userId } }, info) => {
+    // Check if logged in first
+    if (!userId) throw new Error('You must be logged in to do that!');
+    // Check their current cart
+    const [existingCartItem] = await db.query.cartItems({
+      where: {
+        user: { id: userId },
+        item: { id: args.id },
+      },
+    });
+    // If item already in cart, quantity++
+    if (existingCartItem) {
+      return db.mutation.updateCartItem(
+        {
+          where: { id: existingCartItem.id },
+          data: { quantity: existingCartItem.quantity + 1 },
+        },
+        info,
+      );
+    }
+    // If not add for first time!
+    return db.mutation.createCartItem(
+      {
+        data: {
+          user: { connect: { id: userId } },
+          item: { connect: { id: args.id } },
+        },
+      },
+      info,
+    );
+  },
+  removeFromCart: async (parent, { id }, { db, request: { userId } }, info) => {
+    // Check if logged in first
+    if (!userId) throw new Error('You must be logged in to do that!');
+    // Check their current cart
+    const cartItem = await db.query.cartItem({ where: { id } }, `{ id user { id }}`);
+    // Make sure we actually found something
+    if (!cartItem) throw new Error('No CartItem found');
+    // Check that the item being removed is from their own cart (nobody else should be able to edit it!)
+    if (cartItem.user.id !== userId) throw new Error('This is not your item to remove');
+    // Everything checks out, delete the item
+    return db.mutation.deleteCartItem({ where: { id } }, info);
+  },
 };
 
 module.exports = Mutations;
