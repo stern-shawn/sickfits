@@ -1,5 +1,6 @@
 import React from 'react';
 import { Query, Mutation } from 'react-apollo';
+import { adopt } from 'react-adopt';
 import gql from 'graphql-tag';
 import CartStyles from './styles/CartStyles';
 import Supreme from './styles/Supreme';
@@ -24,46 +25,51 @@ export const TOGGLE_CART_MUTATION = gql`
   }
 `;
 
+// If we only pass user: <User /> we'll get a no children prop warning from react, workaround
+// is to provide each with the given render fn from adopt
+const Composed = adopt({
+  user: ({ render }) => <User>{render}</User>,
+  toggleCart: ({ render }) => <Mutation mutation={TOGGLE_CART_MUTATION}>{render}</Mutation>,
+  localState: ({ render }) => <Query query={CART_QUERY}>{render}</Query>,
+});
+
 const Cart = () => (
-  <User>
-    {({ data: { me } }) => {
+  <Composed>
+    {({ user, toggleCart, localState }) => {
+      // Destructure out the data from our query components
+      const { me } = user.data;
+      const { cartOpen } = localState.data;
+
       if (!me) return null;
+
       return (
-        <Mutation mutation={TOGGLE_CART_MUTATION}>
-          {toggleCart => (
-            <Query query={CART_QUERY}>
-              {({ data: { cartOpen } }) => (
-                <CartStyles open={cartOpen}>
-                  <header>
-                    <CloseButton title="close" onClick={toggleCart}>
-                      &times;
-                    </CloseButton>
-                    <Supreme>
-                      {me.name}
-                      's Cart
-                    </Supreme>
-                    <p>
-                      You have {me.cart.length} item
-                      {me.cart.length === 1 ? '' : 's'} in your cart.
-                    </p>
-                  </header>
-                  <ul>
-                    {me.cart.map(cartItem => (
-                      <CartItem key={cartItem.id} cartItem={cartItem} />
-                    ))}
-                  </ul>
-                  <footer>
-                    <p>{formatMoney(calcTotalPrice(me.cart))}</p>
-                    <SickButton>Checkout</SickButton>
-                  </footer>
-                </CartStyles>
-              )}
-            </Query>
-          )}
-        </Mutation>
+        <CartStyles open={cartOpen}>
+          <header>
+            <CloseButton title="close" onClick={toggleCart}>
+              &times;
+            </CloseButton>
+            <Supreme>
+              {me.name}
+              's Cart
+            </Supreme>
+            <p>
+              You have {me.cart.length} item
+              {me.cart.length === 1 ? '' : 's'} in your cart.
+            </p>
+          </header>
+          <ul>
+            {me.cart.map(cartItem => (
+              <CartItem key={cartItem.id} cartItem={cartItem} />
+            ))}
+          </ul>
+          <footer>
+            <p>{formatMoney(calcTotalPrice(me.cart))}</p>
+            <SickButton>Checkout</SickButton>
+          </footer>
+        </CartStyles>
       );
     }}
-  </User>
+  </Composed>
 );
 
 export default Cart;
