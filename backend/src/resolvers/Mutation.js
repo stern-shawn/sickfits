@@ -202,6 +202,18 @@ const Mutations = {
       info,
     );
   },
+  removeFromCart: async (parent, { id }, { db, request: { userId } }, info) => {
+    // Check if logged in first
+    if (!userId) throw new Error('You must be logged in to do that!');
+    // Check their current cart
+    const cartItem = await db.query.cartItem({ where: { id } }, `{ id user { id }}`);
+    // Make sure we actually found something
+    if (!cartItem) throw new Error('No CartItem found');
+    // Check that the item being removed is from their own cart (nobody else should be able to edit it!)
+    if (cartItem.user.id !== userId) throw new Error('This is not your item to remove');
+    // Everything checks out, delete the item
+    return db.mutation.deleteCartItem({ where: { id } }, info);
+  },
 };
 
 module.exports = Mutations;
