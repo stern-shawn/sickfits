@@ -46,12 +46,17 @@ const Mutations = {
     return item;
   },
   deleteItem: async (parent, args, ctx, info) => {
-    // TODO: Check if they are logged in
     // Get the item id from args as 'where'
     const where = { id: args.id };
     // Find the Item / verify it exists, and pull just the id/title with raw graphql instead of `info`
-    const item = await ctx.db.query.item({ where }, `{ id title }`);
-    // TODO: Verify user either owns the item or has permissions to delete anyway (admin, etc)
+    // In addition, we'll need to query for the connected user and their id for permission checking
+    const item = await ctx.db.query.item({ where }, `{ id title user { id }}`);
+    // Verify user either owns the item or has permissions to delete anyway (admin, etc)
+    const ownsItem = (item.user.id = ctx.request.userId);
+    const hasPermissions = ctx.request.user.permissions.some(permission =>
+      ['ADMIN', 'ITEMDELETE'].includes(permission),
+    );
+    if (!ownsItem && !hasPermissions) throw new Error('You do not have permission to do that!');
     // Actually delete it!
     return ctx.db.mutation.deleteItem({ where }, info);
   },
