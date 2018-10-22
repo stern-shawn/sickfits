@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { randomBytes } = require('crypto');
 const { promisify } = require('util');
 const { transport, makeANiceEmail } = require('../mail');
+const { hasPermissions } = require('../utils');
 
 // Generates a JWT for the given user and attaches it as a cookie to the provided response object
 const assignToken = (user, response) => {
@@ -145,6 +146,25 @@ const Mutations = {
     assignToken(user, response);
     // Return the user
     return updatedUser;
+  },
+  updatePermissions: async (parent, { permissions, userId }, { db, request }, info) => {
+    // Check if logged in first
+    if (!request.userId) throw new Error('You must be logged in to do that!');
+    // Check if they have permissions to do the update
+    hasPermissions(request.user, ['ADMIN', 'PERMISSIONUPDATE']);
+    // Update permissions of targeted user
+    return db.mutation.updateUser(
+      {
+        where: { id: userId },
+        data: {
+          // Because permissions is a custom enum, we need to use Prisma's `set` arg
+          permissions: {
+            set: permissions,
+          },
+        },
+      },
+      info,
+    );
   },
 };
 
