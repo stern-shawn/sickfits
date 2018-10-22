@@ -19,9 +19,22 @@ const assignToken = (user, response) => {
 const randomBytesPromise = promisify(randomBytes);
 
 const Mutations = {
-  createItem: async (parent, args, ctx, info) => {
-    // TODO: Check if they are logged in
-    const item = await ctx.db.mutation.createItem({ data: { ...args } }, info);
+  createItem: async (parent, args, { db, request }, info) => {
+    if (!request.userId) throw new Error('You must be logged in to do that!');
+    const item = await db.mutation.createItem(
+      {
+        data: {
+          // This is how we create an Item <-> User relationship
+          user: {
+            connect: {
+              id: request.userId,
+            },
+          },
+          ...args,
+        },
+      },
+      info,
+    );
     return item;
   },
   updateItem: async (parent, args, ctx, info) => {
