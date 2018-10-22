@@ -1,6 +1,7 @@
 import withApollo from 'next-with-apollo';
 import ApolloClient from 'apollo-boost';
 import { endpoint } from '../config';
+import { CART_QUERY } from '../components/Cart';
 
 const createClient = ({ headers }) =>
   new ApolloClient({
@@ -12,6 +13,26 @@ const createClient = ({ headers }) =>
         },
         headers,
       });
+    },
+    // Local data, think Redux!
+    clientState: {
+      resolvers: {
+        Mutation: {
+          toggleCart: (parent, args, { cache }, info) => {
+            // Read the value from cache
+            const { cartOpen } = cache.readQuery({ query: CART_QUERY });
+            // Write the opposite to cache
+            const data = {
+              data: { cartOpen: !cartOpen },
+            };
+            cache.writeData(data);
+            return data;
+          },
+        },
+      },
+      defaults: {
+        cartOpen: false,
+      },
     },
   });
 
