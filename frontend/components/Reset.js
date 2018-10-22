@@ -60,7 +60,9 @@ class Reset extends Component {
             <fieldset disabled={loading} aria-busy={loading}>
               <h2>Reset Your Password</h2>
               <ErrorMessage error={error} />
-              {!error && !loading && called && <p>Password successfully updated! You're now logged in!</p>}
+              {!error &&
+                !loading &&
+                called && <p>Password successfully updated! You're now logged in!</p>}
               <label htmlFor="password">
                 Password
                 <input
