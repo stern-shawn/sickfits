@@ -35,7 +35,21 @@ class RemoveFromCart extends React.Component {
       <Mutation
         mutation={REMOVE_FROM_CART_MUTATION}
         variables={{ id }}
-        refetchQueries={[{ query: CURRENT_USER_QUERY }]}
+        update={(cache, payload) => {
+          // Read from cache
+          const data = cache.readQuery({ query: CURRENT_USER_QUERY });
+          // Update the data to remove the targeted cart item
+          const idToRemove = payload.data.removeFromCart.id;
+          data.me.cart = data.me.cart.filter(cartItem => cartItem.id !== idToRemove);
+          // Write the new data back to the cache
+          cache.writeQuery({ query: CURRENT_USER_QUERY, data });
+        }}
+        optimisticResponse={{
+          removeFromCart: {
+            __typename: 'CartItem',
+            id,
+          },
+        }}
       >
         {(removeFromCart, { loading }) => (
           <BigButton
