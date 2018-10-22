@@ -9,8 +9,8 @@ const Table = styled.table`
   }
   td,
   th {
-    border-bottom: 1px solid ${props => props.theme.offWhite};
-    border-right: 1px solid ${props => props.theme.offWhite};
+    border-bottom: 1px solid ${({ theme }) => theme.offWhite};
+    border-right: 1px solid ${({ theme }) => theme.offWhite};
     padding: 10px 5px;
     position: relative;
     &:last-child {
@@ -23,7 +23,7 @@ const Table = styled.table`
   }
   tr {
     &:hover {
-      background: ${props => props.theme.offWhite};
+      background: ${({ theme }) => theme.offWhite};
     }
   }
 `;

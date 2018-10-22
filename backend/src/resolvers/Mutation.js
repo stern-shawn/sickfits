@@ -54,12 +54,12 @@ const Mutations = {
     // Actually delete it!
     return ctx.db.mutation.deleteItem({ where }, info);
   },
-  signup: async (parent, args, { response }, info) => {
+  signup: async (parent, args, { db, response }, info) => {
     args.email = args.email.toLowerCase();
     // Hash their password
     const password = await bcrypt.hash(args.password, 10);
     // Generate a user with default user permissions
-    const user = await ctx.db.mutation.createUser(
+    const user = await db.mutation.createUser(
       {
         data: {
           ...args,
