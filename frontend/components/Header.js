@@ -4,6 +4,7 @@ import Router from 'next/router';
 import NProgress from 'nprogress';
 import styled from 'styled-components';
 import Nav from './Nav';
+import Cart from './Cart';
 
 // Hook into Router events and trigger the NProgress bar as needed to indicate route changes
 Router.onRouteChangeStart = () => {
@@ -68,7 +69,7 @@ const Header = () => (
       <div className="sub-bar">
         <p>Search</p>
       </div>
-      <div>Cart</div>
+      <Cart />
     </div>
   </StyledHeader>
 );
