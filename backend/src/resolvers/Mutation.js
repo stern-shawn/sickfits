@@ -4,6 +4,7 @@ const { randomBytes } = require('crypto');
 const { promisify } = require('util');
 const { transport, makeANiceEmail } = require('../mail');
 const { hasPermissions } = require('../utils');
+const stripe = require('../stripe');
 
 // Generates a JWT for the given user and attaches it as a cookie to the provided response object
 const assignToken = (user, response) => {
@@ -213,6 +214,47 @@ const Mutations = {
     if (cartItem.user.id !== userId) throw new Error('This is not your item to remove');
     // Everything checks out, delete the item
     return db.mutation.deleteCartItem({ where: { id } }, info);
+  },
+  createOrder: async (parent, { token }, { db, request: { userId } }, info) => {
+    // Check if logged in first
+    if (!userId) throw new Error('You must be logged in to complete this order!');
+    // Get the user since the user provided by the middleware doesn't include ALL the data we need
+    const user = await db.query.user(
+      { where: { id: userId } },
+      `{
+        id
+        email
+        name
+        cart {
+          id
+          quantity
+          item {
+            id
+            title
+            price
+            description
+            image
+          }
+        }
+      }`,
+    );
+    // Calculate the price using the database values, don't trust the front end!
+    const amount = user.cart.reduce(
+      (tally, cartItem) => tally + cartItem.quantity * cartItem.item.price,
+      0,
+    );
+    // Create the stripe charge (turn the token into $$$)
+    const charge = await stripe.charges.create({
+      amount,
+      currency: 'USD',
+      source: token,
+    });
+    // Convert cartItems to orderItems
+
+    // Create the Order
+    // Clean up the user's cart, delete cartItems
+    // Return the order to the client!
+    // Check their current cart
   },
 };
 
