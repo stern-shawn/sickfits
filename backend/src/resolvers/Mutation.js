@@ -234,6 +234,7 @@ const Mutations = {
             price
             description
             image
+            largeImage
           }
         }
       }`,
@@ -250,11 +251,40 @@ const Mutations = {
       source: token,
     });
     // Convert cartItems to orderItems
-
+    const orderItems = user.cart.map(cartItem => {
+      // The item has its own id already, strip it so a unique one will be generated! Yay ES6
+      const { id, ...cartItemPropsToCopy } = cartItem.item;
+      const orderItem = {
+        // We want to copy over all of the properties from the item in cartItem
+        ...cartItemPropsToCopy,
+        // Then inject the special values we need, ie quantity of item + user connection
+        quantity: cartItem.quantity,
+        user: {
+          connect: {
+            id: user.id,
+          },
+        },
+      };
+      return orderItem;
+    });
     // Create the Order
+    const order = await db.mutation.createOrder({
+      data: {
+        total: charge.amount,
+        charge: charge.id,
+        // Prisma is super cool and lets us create the orderItems and link them to this order as its
+        // being created in one go, instead of needing to first create orderItems then link it to
+        // this order. Sick!
+        items: { create: orderItems },
+        user: { connect: { id: user.id } },
+      },
+    });
     // Clean up the user's cart, delete cartItems
+    const cartItemsIds = user.cart.map(cartItem => cartItem.id);
+    // Helper Prisma method! Delete all cartItems in the array of ids!
+    await db.mutation.deleteManyCartItems({ where: { id_in: cartItemsIds } });
     // Return the order to the client!
-    // Check their current cart
+    return order;
   },
 };
 

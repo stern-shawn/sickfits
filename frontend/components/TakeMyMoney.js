@@ -26,11 +26,8 @@ const CREATE_ORDER_MUTATION = gql`
 const totalItems = cart => cart.reduce((tally, cartItem) => tally + cartItem.quantity, 0);
 
 class TakeMyMoney extends Component {
-  onToken = (res, createOrder) => {
-    console.log('Token get!');
-    console.log(res.id);
+  onToken = (res, createOrder) =>
     createOrder({ variables: { token: res.id } }).catch(err => alert(err.message));
-  };
 
   render() {
     return (
@@ -40,7 +37,7 @@ class TakeMyMoney extends Component {
             mutation={CREATE_ORDER_MUTATION}
             refetchQueries={[{ query: CURRENT_USER_QUERY }]}
           >
-            {(createOrder, { loading, error }) => (
+            {createOrder => (
               <StripeCheckout
                 amount={calcTotalPrice(me.cart)}
                 name="Sick Fits"

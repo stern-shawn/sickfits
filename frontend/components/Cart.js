@@ -66,7 +66,7 @@ const Cart = () => (
           <footer>
             <p>{formatMoney(calcTotalPrice(me.cart))}</p>
             <TakeMyMoney>
-              <SickButton>Checkout</SickButton>
+              <SickButton disabled={me.cart.length === 0}>Checkout</SickButton>
             </TakeMyMoney>
           </footer>
         </CartStyles>
