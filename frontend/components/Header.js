@@ -5,19 +5,20 @@ import NProgress from 'nprogress';
 import styled from 'styled-components';
 import Nav from './Nav';
 import Cart from './Cart';
+import Search from './Search';
 
 // Hook into Router events and trigger the NProgress bar as needed to indicate route changes
 Router.onRouteChangeStart = () => {
   NProgress.start();
-}
+};
 
 Router.onRouteChangeComplete = () => {
   NProgress.done();
-}
+};
 
 Router.onRouteChangeError = () => {
   NProgress.done();
-}
+};
 
 const Logo = styled.h1`
   font-size: 4rem;
@@ -66,11 +67,11 @@ const Header = () => (
         </Link>
       </Logo>
       <Nav />
-      <div className="sub-bar">
-        <p>Search</p>
-      </div>
-      <Cart />
     </div>
+    <div className="sub-bar">
+      <Search />
+    </div>
+    <Cart />
   </StyledHeader>
 );
 
