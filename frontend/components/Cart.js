@@ -13,7 +13,7 @@ import calcTotalPrice from '../lib/calcTotalPrice';
 import formatMoney from '../lib/formatMoney';
 
 // Query the client-only part of cache using the @client directive
-export const CART_QUERY = gql`
+export const CART_STATE_QUERY = gql`
   query {
     cartOpen @client
   }
@@ -31,7 +31,7 @@ export const TOGGLE_CART_MUTATION = gql`
 const Composed = adopt({
   user: ({ render }) => <User>{render}</User>,
   toggleCart: ({ render }) => <Mutation mutation={TOGGLE_CART_MUTATION}>{render}</Mutation>,
-  localState: ({ render }) => <Query query={CART_QUERY}>{render}</Query>,
+  localState: ({ render }) => <Query query={CART_STATE_QUERY}>{render}</Query>,
 });
 
 const Cart = () => (
