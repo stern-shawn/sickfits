@@ -6,7 +6,7 @@ import Link from 'next/link';
 import PaginationStyles from './styles/PaginationStyles';
 import { perPage } from '../config';
 
-const PAGINATION_QUERY = gql`
+export const PAGINATION_QUERY = gql`
   query PAGINATION_QUERY {
     itemsConnection {
       aggregate {
@@ -22,19 +22,24 @@ const Pagination = ({ page }) => (
       if (loading) return <p>Loading...</p>;
       const { count } = data.itemsConnection.aggregate;
       const pages = Math.ceil(count / perPage);
-      const pageText = `Page ${page} of ${pages}`;
       return (
-        <PaginationStyles>
+        <PaginationStyles data-test="pagination">
           <Head>
-            <title>Sick Fits | {pageText}</title>
+            <title>Sick Fits | {`Page ${page} of ${pages}`}</title>
           </Head>
           <Link prefetch href={{ pathname: '/items', query: { page: page - 1 } }}>
-            <a className="prev" aria-disabled={page <= 1}>← Prev</a>
+            <a className="prev" aria-disabled={page <= 1}>
+              ← Prev
+            </a>
           </Link>
-          <p>{pageText}</p>
+          <p>
+            Page {page} of <span className="totalPages">{pages}</span>
+          </p>
           <p>{count} Items Total</p>
           <Link prefetch href={{ pathname: '/items', query: { page: page + 1 } }}>
-            <a className="next" aria-disabled={page >= pages}>Next →</a>
+            <a className="next" aria-disabled={page >= pages}>
+              Next →
+            </a>
           </Link>
         </PaginationStyles>
       );

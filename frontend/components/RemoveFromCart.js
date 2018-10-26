@@ -5,7 +5,7 @@ import gql from 'graphql-tag';
 import { CURRENT_USER_QUERY } from './User';
 import styled from 'styled-components';
 
-const REMOVE_FROM_CART_MUTATION = gql`
+export const REMOVE_FROM_CART_MUTATION = gql`
   mutation REMOVE_FROM_CART_MUTATION($id: ID!) {
     removeFromCart(id: $id) {
       id

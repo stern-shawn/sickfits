@@ -79,6 +79,7 @@ class CreateItem extends Component {
                 query: { id: res.data.createItem.id },
               });
             }}
+            data-test="form"
           >
             <ErrorMessage error={error} />
             <fieldset disabled={loading || imageUploading} aria-busy={loading}>

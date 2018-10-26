@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { Query, Mutation } from 'react-apollo';
 import gql from 'graphql-tag';
 import xor from 'lodash.xor';
-import Error from './ErrorMessage';
+import ErrorMessage from './ErrorMessage';
 import Table from './styles/Table';
 import SickButton from './styles/SickButton';
 
@@ -39,9 +39,11 @@ const UPDATE_PERMISSIONS_MUTATION = gql`
 
 const Permissions = props => (
   <Query query={ALL_USERS_QUERY}>
-    {({ data, loading, error }) => (
-      <>
-        <Error error={error} />
+    {({ data, loading, error }) => {
+      if (loading) return <p>Loading...</p>;
+      if (error) return <ErrorMessage error={error} />;
+
+      return (
         <div>
           <h2>Manage Permissions</h2>
           <Table>
@@ -62,8 +64,8 @@ const Permissions = props => (
             </tbody>
           </Table>
         </div>
-      </>
-    )}
+      );
+    }}
   </Query>
 );
 
@@ -99,7 +101,7 @@ class UserPermissions extends React.Component {
             {error && (
               <tr>
                 <td colSpan={9}>
-                  <Error error={error} />
+                  <ErrorMessage error={error} />
                 </td>
               </tr>
             )}
